@@ -44,4 +44,4 @@ It seems like the interface doesn't have access to your USB ports. You'll need t
 Also note, that if you're viewing the interface from another device, than the one it the script is running on, you'll still need to plug your Switch into the machine that runs the script.
 
 #### It says there's an unknown error.
-Uh-oh, that's not good. [Open up an issue]() with the exact error message, and some more info. (e.g.: your payload, the machine you're running the script on)
+Uh-oh, that's not good. [Open up an issue](https://github.com/moriczgergo/interface-de-fusee/issues/new) with the exact error message, and some more info. (e.g.: your payload, the machine you're running the script on)
