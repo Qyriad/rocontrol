@@ -49,7 +49,7 @@ class IDFRequestHandler(BaseHTTPRequestHandler):
     def do_POST(self):
         # get POST JSON data
         contentLen = int(self.headers.get('Content-Length'))
-        postBody = self.rfile.read(contentLen)
+        postBody = self.rfile.read(contentLen).decode("utf8")
         postObj = json.loads(postBody)
 
         fuseeResult = fuseeExec(postObj["payload"])
@@ -99,10 +99,11 @@ def fuseeExec(payload):
         os.remove(tempBinPath)
         return result
 
-    fuseeFilePath = os.path.join(os.path.dirname(os.path.realpath(__file__)), "fusee-launcher/fusee-launcher.py") # build path for fusee-launcher file
+    fuseeLauncherDir = os.path.join(os.path.dirname(os.path.realpath(__file__)), "fusee-launcher/") # build path for fusee-launcher dir
+    fuseeFilePath = os.path.join(fuseeLauncherDir, "fusee-launcher.py") # build path for fusee-launcher file
 
     # cwd trickery, for fusée's well being with intermezzo (TODO: Test if this is needed for sure)
-    os.chdir(os.path.dirname(fuseeFilePath))
+    os.chdir(os.path.dirname(fuseeLauncherDir))
 
     p = subprocess.Popen([sys.executable, fuseeFilePath, tempBinPath], stdout=subprocess.PIPE, stderr=subprocess.PIPE) # run fusée gelée
     p.wait() # wait for it to close
