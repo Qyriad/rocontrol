@@ -1,5 +1,5 @@
 # Interface de Fusée ![Python 3](https://img.shields.io/badge/python-3-blue.svg)
-An interface for fusée gelée.
+Interface de Fusée is an interface for fusée gelée. It runs a webserver that lets you easily do Switch haxing.
 
 ## Requirements
  * Python 3
@@ -20,6 +20,8 @@ pip3 install -r requirements.txt
 ```
 python3 app.py
 ```
+
+A browser window should pop up! If not, go to `127.0.0.1:1355` (or any different hostname/port you've set in the arguments) from a web browser.
 
 *NOTE:* You may need to use `python` instead of `python3`, if your Python installation is named `python` instead of `python3`.
 
