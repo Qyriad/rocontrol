@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<!-- meta -->
+		<meta charset="utf-8">
+		<meta name="viewport" content="initial-scale=1"> <!-- for mobile devices, so the automatically zoom on the otherwise small UI -->
+		
+		<title>Interface de Fusée</title>
+		
+		<!-- fonts -->
+		<link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
+		
+		<!-- CSS stylesheet for whole page -->
+		<style>
+			html, body {
+				/* layout */
+				width: 100%;
+				height: 100%;
+				margin: 0;
+				padding: 0;
+
+				/* text */
+				font-family: 'Roboto', sans-serif;
+				text-align: center;
+				
+				/* colors */
+				color: #4ECCA3;
+				background-color: #232931;
+			}
+			
+			body {
+				/* layout */
+				display: flex;
+				align-items: center;
+				justify-content: center;
+			}
+			
+			#payload {
+				/* layout */
+				margin-left: auto;
+				margin-right: auto;
+			}
+			
+			#launch {
+				/* layout */
+				height: 50px;
+				width: 150px;
+				
+				/* rounding */
+				border: none;
+				border-radius: 5px;
+
+				/* color */
+				background-color: #4ECCA3;
+				color: #232931;
+			}
+		</style>
+	</head>
+	<body>
+		<div id="app">
+			Select a payload<br>
+			<input type="file" id="payload" accept=".bin"><br><br>
+			<button id="launch">Launch</button>
+		</div>
+
+		<!-- AJAX/File handling script -->
+		<script>
+			// Browser support check for JS File access
+			if (!window.FileReader || !window.Blob) {
+				document.getElementById("app").style.display = "hidden";
+				alert("Interface de Fusée is not supported by your device.");
+			}
+			
+			function checkFileProblems(fileInput) {
+				if (!fileInput.value.replace(/^.*[\\\/]/, '').toLowerCase().endsWith(".bin")) { // Check if it's a .bin file (by file extension, meh)
+					return "Please upload a supported .bin file.";
+				}
+			}
+			
+			document.getElementById("launch").addEventListener('click', function() {
+				var fileUpload = document.getElementById("payload");
+				if (fileUpload.files.length < 1) {
+					alert("Please select a file.");
+					return;
+				}
+				
+				if (fileUpload.files.length > 1) {
+					alert("Please only select one file.");
+					return;
+				}
+				
+				var payloadFile = fileUpload.files[0];
+				
+				var payloadError = checkFileProblems(fileUpload);
+				if (payloadError) { // NOTE: If there are no problems, undefined is returned. This if statement only triggers if there's a problem.
+					alert(payloadError);
+					return;
+				}
+				
+				var reader = new FileReader();
+				reader.readAsDataURL(payloadFile);
+				reader.onload = function() {
+					var payloadBase = reader.result.replace(new RegExp("data:.+/.+;base64,", "i"), ""); // Replace trailing Data URL syntax to get pure Base64
+					console.log(payloadBase); // Good for debugging
+					
+					var request = new XMLHttpRequest();
+					request.open("POST", "/");
+					request.setRequestHeader("Content-Type", "application/json; charset=utf-8");
+					
+					request.onload = function() {
+						alert(this.response); // Should be fine, since a custom message is returned on OK by the server.
+					};
+					
+					request.onerror = function() {
+						alert("An error occurred while reaching the endpoint.");
+					};
+					
+					request.send(JSON.stringify({ payload: payloadBase }));
+				};
+				
+				reader.onerror = function(error) {
+					console.error(error);
+					alert("An error happened while reading the file.");
+				};
+			});
+		</script>
+	</body>
+</html>
