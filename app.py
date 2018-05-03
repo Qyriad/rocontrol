@@ -1,6 +1,5 @@
 from tkinter import *
 from tkinter import messagebox, filedialog
-import nanoid
 import os, sys
 import subprocess
 
