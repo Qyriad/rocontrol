@@ -14,7 +14,7 @@ titleLabel = Label(top, text="Interface de Fusée")
 titleLabel.pack()
 
 # fusee error/result code explainer messages
-fuseeCodeMessages = ["Done!", "It seems like your Switch isn't plugged in.", "No access to USB. (you should probably re-run the interface script with sudo or Administrator privileges)", "Unknown Fusée Gelée error. (try running it on it's own and see what's up)"]
+fuseeCodeMessages = ["Done!", "It seems like your Switch isn't plugged in.", "No access to USB. (you should probably re-run the interface script with sudo or Administrator privileges)", "It seems like your Switch isn't on an XHCI backend. Try plugging it in into a USB 3.0 (blue) port.", "Unknown Fusée Gelée error. (try running it on it's own and see what's up)"]
 
 def fusee_exec(payload):
     """
@@ -27,7 +27,8 @@ def fusee_exec(payload):
      * 0: A-OK
      * 1: Your Switch isn't plugged in.
      * 2: No access to USB. (re-run w/ sudo, probably)
-     * 3: Unknown Fusée Gelée error.
+     * 3: The Switch isn't plugged into an XHCI backend.
+     * 4: Unknown Fusée Gelée error.
     """
 
     result = 0 # default result
@@ -47,8 +48,10 @@ def fusee_exec(payload):
             result = 1
         elif "errno 13" in errout.lower() and p.returncode == 1: # Errno 13: Access Denied (for USB)
             result = 2
-        else:
+        elif "This device needs to be on an XHCI backend." in errout and p.returncode == 1:
             result = 3
+        else:
+            result = 4
 
     return result
 
