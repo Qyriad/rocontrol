@@ -3,6 +3,9 @@ from tkinter import messagebox, filedialog
 import os, sys
 import subprocess
 
+fuseeLauncherDir = os.path.join(os.path.dirname(os.path.realpath(__file__)), "fusee-launcher/") # build path for fusee-launcher dir
+fuseeFilePath = os.path.join(fuseeLauncherDir, "fusee-launcher.py") # build path for fusee-launcher file
+
 top = Tk()
 top.title("Interface de Fusée")
 
@@ -29,11 +32,8 @@ def fusee_exec(payload):
 
     result = 0 # default result
 
-    fuseeLauncherDir = os.path.join(os.path.dirname(os.path.realpath(__file__)), "fusee-launcher/") # build path for fusee-launcher dir
-    fuseeFilePath = os.path.join(fuseeLauncherDir, "fusee-launcher.py") # build path for fusee-launcher file
-
     # cwd trickery, for fusée's well being with intermezzo (TODO: Test if this is needed for sure)
-    os.chdir(os.path.dirname(fuseeLauncherDir))
+    os.chdir(fuseeLauncherDir)
 
     p = subprocess.Popen([sys.executable, fuseeFilePath, payload], stdout=subprocess.PIPE, stderr=subprocess.PIPE) # run fusée gelée
     p.wait() # wait for it to close
@@ -41,6 +41,8 @@ def fusee_exec(payload):
     if p.returncode != 0: # if it failed
         output = p.stdout.read().decode("utf-8")
         errout = p.stderr.read().decode("utf-8")
+        print(output)
+        print(errout)
         if output.lower().startswith("no") and p.returncode == 255: # No TegraRCM device found?
             result = 1
         elif "errno 13" in errout.lower() and p.returncode == 1: # Errno 13: Access Denied (for USB)
