@@ -10,6 +10,21 @@ Interface de Fusée is an interface for fusée gelée.
 
 The requirements in *italics* are a requirement of fusée gelée, not rocontrol.
 
+### Setting up the requirements
+
+#### Windows
+
+ * Download and install [Git](https://git-scm.com/download/win).
+ * Download and install [Python 3](https://www.python.org/downloads/windows/).
+
+#### Ubuntu
+
+`sudo apt-get install git python3 python3-pip python3-tk libusb-dev`
+
+#### macOS
+
+ * Download and install [Git](https://git-scm.com/download/mac).
+
 ## Setup
 
 ### Windows
