@@ -39,19 +39,19 @@ def fusee_exec(payload):
     p = subprocess.Popen([sys.executable, fuseeFilePath, payload], stdout=subprocess.PIPE, stderr=subprocess.PIPE) # run fusée gelée
     p.wait() # wait for it to close
 
-    if p.returncode != 0: # if it failed
-        output = p.stdout.read().decode("utf-8")
-        errout = p.stderr.read().decode("utf-8")
-        print(output)
-        print(errout)
-        if output.lower().startswith("no") and p.returncode == 255: # No TegraRCM device found?
-            result = 1
-        elif "errno 13" in errout.lower() and p.returncode == 1: # Errno 13: Access Denied (for USB)
-            result = 2
-        elif "This device needs to be on an XHCI backend." in errout and p.returncode == 1:
-            result = 3
-        else:
-            result = 4
+    output = p.stdout.read().decode("utf-8")
+    errout = p.stderr.read().decode("utf-8")
+    print(output)
+    print(errout)
+
+    if output.lower().startswith("no") and p.returncode == 255: # No TegraRCM device found?
+        result = 1
+    elif "errno 13" in errout.lower() and p.returncode == 1: # Errno 13: Access Denied (for USB)
+        result = 2
+    elif "This device needs to be on an XHCI backend." in output and p.returncode == 0:
+        result = 3
+    elif p.returncode != 0:
+        result = 4
 
     return result
 
