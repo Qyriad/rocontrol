@@ -1,5 +1,5 @@
 # rocontrol ![Python 3](https://img.shields.io/badge/python-3-blue.svg)
-Interface de Fusée is an interface for fusée gelée.
+An interface for fusée gelée.
 
 ![](https://github.com/moriczgergo/rocontrol/blob/assets/windows_preview.png) ![](https://raw.githubusercontent.com/moriczgergo/rocontrol/assets/ubuntu_preview.png) ![](https://raw.githubusercontent.com/moriczgergo/rocontrol/assets/mac_preview.png)
 
@@ -30,7 +30,7 @@ The requirements in *italics* are a requirement of fusée gelée, not rocontrol.
 ### Windows
 
 ```
-git clone --recursive https://github.com/moriczgergo/interface-de-fusee
+git clone --recursive https://github.com/moriczgergo/rocontrol
 cd interface-de-fusee/
 pip install pyusb
 ```
@@ -40,7 +40,7 @@ pip install pyusb
 ### Linux
 
 ```
-git clone --recursive https://github.com/moriczgergo/interface-de-fusee
+git clone --recursive https://github.com/moriczgergo/rocontrol
 cd interface-de-fusee/
 pip3 install pyusb
 ```
