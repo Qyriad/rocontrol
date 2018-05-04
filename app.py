@@ -1,130 +1,76 @@
-from http.server import BaseHTTPRequestHandler, HTTPServer
-import nanoid
-import os
-import sys
+from tkinter import *
+from tkinter import messagebox, filedialog
+import os, sys
 import subprocess
-import base64
-import json
-import argparse
-import webbrowser
 
-# default hostname and ports
-srvHostname = "127.0.0.1"
-srvPort = 1533
+fuseeLauncherDir = os.path.join(os.path.dirname(os.path.realpath(__file__)), "fusee-launcher/") # build path for fusee-launcher dir
+fuseeFilePath = os.path.join(fuseeLauncherDir, "fusee-launcher.py") # build path for fusee-launcher file
 
-# argument parsing, yay!
-parser = argparse.ArgumentParser(description="An interface for fusée gelée.")
-parser.add_argument('--port', '-p', type=int)
-parser.add_argument('--host', '--hostname', type=str)
+top = Tk()
+top.title("Interface de Fusée")
 
-args = parser.parse_args()
+titleLabel = Label(top, text="Interface de Fusée")
 
-if args.host:
-    srvHostname = args.host
-
-if args.port:
-    srvPort = args.port
-
-# path building for ./web/
-web_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'web')
-
-# index.html caching
-indexFileObj = open(os.path.join(web_dir, "index.html"), "rb")
-indexFile = indexFileObj.read().decode('utf8') # utf8 needed for "é", and the well being of my mind
-indexFileObj.close()
+titleLabel.pack()
 
 # fusee error/result code explainer messages
-fuseeCodeMessages = ["Done!", "It seems like your Switch isn't plugged in.", "No access to USB. (you should probably re-run the interface script with sudo or Administrator privileges)", "Hmm, it seems like the data I got back is bad. Try again please.", "Unknown filesystem error. (maybe you're out of space?)", "Unknown Fusée Gelée error. (try running it on it's own and see what's up)"]
+fuseeCodeMessages = ["Done!", "It seems like your Switch isn't plugged in.", "No access to USB. (you should probably re-run the interface script with sudo or Administrator privileges)", "It seems like your Switch isn't on an XHCI backend. Try plugging it in into a USB 3.0 (blue) port.", "Unknown Fusée Gelée error. (try running it on it's own and see what's up)"]
 
-class IDFRequestHandler(BaseHTTPRequestHandler):
-    def do_GET(self):
-        self.send_response(200)
-
-        self.send_header('Content-Type', 'text/html')
-        self.end_headers()
-
-        self.wfile.write(bytes(indexFile, "utf8"))
-        return
-    
-    def do_POST(self):
-        # get POST JSON data
-        contentLen = int(self.headers.get('Content-Length'))
-        postBody = self.rfile.read(contentLen).decode("utf8")
-        postObj = json.loads(postBody)
-
-        fuseeResult = fuseeExec(postObj["payload"])
-        
-        self.send_response(400 if fuseeResult > 0 else 200)
-
-        self.send_header('Content-Type', 'text/plain')
-        self.end_headers()
-
-        message = fuseeCodeMessages[fuseeResult] # get response message
-
-        self.wfile.write(bytes(message, "utf8"))
-        return
-
-def fuseeExec(payload):
+def fusee_exec(payload):
     """
-    Executes fusée gelée from a Base64 payload.
+    Executes fusée gelée from a payload file path.
 
     Arguments:
-     * payload - Payload in Base64
+     * payload - Payload path
     
     Returns: return code
      * 0: A-OK
      * 1: Your Switch isn't plugged in.
      * 2: No access to USB. (re-run w/ sudo, probably)
-     * 3: Bad Base64.
-     * 4: Unknown FS error. (you're probably out of space)
-     * 5: Unknown Fusée Gelée error.
+     * 3: The Switch isn't plugged into an XHCI backend.
+     * 4: Unknown Fusée Gelée error.
     """
 
     result = 0 # default result
 
-    tempBinFile = nanoid.generate(alphabet="1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_-") + ".bin" # generate a temporary .bin filename
-    tempBinPath = os.path.join(os.path.dirname(os.path.realpath(__file__)), tempBinFile) # get full path for that generated file name
-
-    file = open(tempBinPath, "wb") # open the temp file in binary mode
-    try:
-        file.write(base64.b64decode(payload)) # write b64 binary data to it
-    except TypeError: # if bad b64
-        result = 3
-    except:
-        result = 4
-    
-    file.close()
-
-    if result != 0: # if an error already happened
-        os.remove(tempBinPath)
-        return result
-
-    fuseeLauncherDir = os.path.join(os.path.dirname(os.path.realpath(__file__)), "fusee-launcher/") # build path for fusee-launcher dir
-    fuseeFilePath = os.path.join(fuseeLauncherDir, "fusee-launcher.py") # build path for fusee-launcher file
-
     # cwd trickery, for fusée's well being with intermezzo (TODO: Test if this is needed for sure)
-    os.chdir(os.path.dirname(fuseeLauncherDir))
+    os.chdir(fuseeLauncherDir)
 
-    p = subprocess.Popen([sys.executable, fuseeFilePath, tempBinPath], stdout=subprocess.PIPE, stderr=subprocess.PIPE) # run fusée gelée
+    p = subprocess.Popen([sys.executable, fuseeFilePath, payload], stdout=subprocess.PIPE, stderr=subprocess.PIPE) # run fusée gelée
     p.wait() # wait for it to close
 
-    if p.returncode != 0: # if it failed
-        output = p.stdout.read().decode("utf-8")
-        errout = p.stderr.read().decode("utf-8")
-        if output.lower().startswith("no") and p.returncode == 255: # No TegraRCM device found?
-            result = 1
-        elif "errno 13" in errout.lower() and p.returncode == 1: # Errno 13: Access Denied (for USB)
-            result = 2
-        else:
-            result = 5
-    
-    os.remove(tempBinPath)
+    output = p.stdout.read().decode("utf-8")
+    errout = p.stderr.read().decode("utf-8")
+    print(output)
+    print(errout)
+
+    if output.lower().startswith("no") and p.returncode == 255: # No TegraRCM device found?
+        result = 1
+    elif "errno 13" in errout.lower() and p.returncode == 1: # Errno 13: Access Denied (for USB)
+        result = 2
+    elif "This device needs to be on an XHCI backend." in output and p.returncode == 0:
+        result = 3
+    elif p.returncode != 0:
+        result = 4
 
     return result
 
+def launch_callback():
+    payloadpath = filedialog.askopenfilename(title = "Select payload file", filetypes = [("Payload files", "*.bin")])
+    if len(payloadpath) == 0:
+        messagebox.showerror("Interface de Fusée", "Please select a file.")
+        return
+    
+    res = fusee_exec(payloadpath)
+    if res == 0:
+        messagebox.showinfo("Interface de Fusée", fuseeCodeMessages[res])
+    else:
+        messagebox.showerror("Interface de Fusée", fuseeCodeMessages[res])
+        
+
+launchButton = Button(top, text="Launch", command=launch_callback)
+
+launchButton.pack()
+
 if __name__ == "__main__":
-    server_address = (srvHostname, srvPort)
-    httpd = HTTPServer(server_address, IDFRequestHandler)
-    print("Listening on host {}, and on port {}. Have fun!".format(server_address[0], server_address[1]))
-    webbrowser.open("http://{}:{}".format(srvHostname, srvPort))
-    httpd.serve_forever()
+    top.mainloop()
