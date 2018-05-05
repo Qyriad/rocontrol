@@ -31,7 +31,7 @@ The requirements in *italics* are a requirement of fusée gelée, not rocontrol.
 
 ```
 git clone --recursive https://github.com/moriczgergo/rocontrol
-cd interface-de-fusee/
+cd rocontrol/
 pip install pyusb
 ```
 
@@ -41,7 +41,7 @@ pip install pyusb
 
 ```
 git clone --recursive https://github.com/moriczgergo/rocontrol
-cd interface-de-fusee/
+cd rocontrol/
 pip3 install pyusb
 ```
 
