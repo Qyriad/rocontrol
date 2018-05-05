@@ -35,10 +35,7 @@ def fusee_exec(payload):
 
     result = 0 # default result
 
-    # cwd trickery, for fusée's well being with intermezzo (TODO: Test if this is needed for sure)
-    os.chdir(fuseeLauncherDir)
-
-    p = subprocess.Popen([sys.executable, fuseeFilePath, payload], stdout=subprocess.PIPE, stderr=subprocess.PIPE) # run fusée gelée
+    p = subprocess.Popen([sys.executable, fuseeFilePath, payload, '--relocator', os.path.join(fuseeLauncherDir, 'intermezzo.bin')], stdout=subprocess.PIPE, stderr=subprocess.PIPE) # run fusée gelée
     p.wait() # wait for it to close
 
     output = p.stdout.read().decode("utf-8")
