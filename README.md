@@ -74,4 +74,6 @@ It seems like rocontrol doesn't have access to your USB ports. You'll need to ru
 Uh-oh, that's not good. [Open up an issue](https://github.com/moriczgergo/rocontrol/issues/new) with the exact error message, and some more info. (e.g.: your payload, the machine you're running the script on)
 
 #### It says it can't connect to the display.
-Run `xhost +localhost`, and `xhost +`.
+Either:
+ - Use gksu/gksudo: `gksu ./app.py`.
+ - Run `xhost +localhost`, and `xhost +`.
